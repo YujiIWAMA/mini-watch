@@ -22,7 +22,7 @@ JST = timezone(timedelta(hours=9))
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 UA = {"User-Agent": "Mozilla/5.0 (personal stock watcher; 1-2 checks/day)"}
 
-ID_RE = re.compile(r"/stocks/bmw/(\d+)\.html")
+ID_RE = re.compile(r"stocks/bmw/(\d+)\.html")
 
 
 def page_url(n):
@@ -46,7 +46,7 @@ def card_for(anchor):
     """リンクから親をたどり、支払総額を含み かつ 他の車両IDを含まない最小の要素を返す"""
     my_id = ID_RE.search(anchor["href"]).group(1)
     node = anchor
-    for _ in range(12):
+    for _ in range(20):
         node = node.parent
         if node is None:
             return None
@@ -54,14 +54,15 @@ def card_for(anchor):
                for a in node.find_all("a", href=ID_RE)}
         if len(ids) > 1 or my_id not in ids:
             return None
-        if "支払総額" in node.get_text():
+        if "支払総額" in re.sub(r"\s+", "", node.get_text()):
             return node
     return None
 
 
 def parse_card(car_id, node):
     text = re.sub(r"\s+", " ", node.get_text(" ")).strip()
-    m_price = re.search(r"支払総額\s*([\d,]+(?:\.\d+)?)\s*万円", text)
+    compact = re.sub(r"\s+", "", node.get_text())
+    m_price = re.search(r"支払総額[^\d]{0,10}([\d,]+(?:\.\d+)?)万円", compact)
     if not m_price:
         return None
     price = round(float(m_price.group(1).replace(",", "")) * 10000)
@@ -71,7 +72,7 @@ def parse_card(car_id, node):
     m_name = re.search(r"(ミニ\S+)\s+((?:クーパー|ワン|ジョン|JCW)\s?\S*)((?:\s+(?:ALL4|\S+ED|\S*エディション|ワンオーナー))*)", head)
     name = " ".join(x.strip() for x in m_name.groups() if x and x.strip()) if m_name else head[:40]
     m_year = re.search(r"(\d{4})年式", text)
-    m_km = re.search(r"([\d,]+)\s*km", text)
+    m_km = re.search(r"([\d,]+)km", compact)
     return {
         "id": car_id,
         "name": name,
@@ -92,6 +93,24 @@ def is_target(car):
     return car["price"] <= MAX_PRICE
 
 
+def debug_dump(html, soup):
+    links = soup.find_all("a", href=ID_RE)
+    print("=== DEBUG ===")
+    print("html length:", len(html), " 支払総額 count:", html.count("支払総額"),
+          " 総額 count:", html.count("総額"), " detail links:", len(links))
+    print("sample hrefs:", [a.get("href") for a in soup.find_all("a", href=True)][:60])
+    for key in ("支払総額", "総額", "F55", "クーパー"):
+        i = html.find(key)
+        if i >= 0:
+            print(f"--- around '{key}' ---")
+            print(html[max(0, i - 2500): i + 800])
+            break
+    else:
+        print("--- head of html ---")
+        print(html[:4000])
+    print("=== END DEBUG ===")
+
+
 def scrape_all():
     cars, n = {}, 1
     while n <= MAX_PAGES:
@@ -110,6 +129,8 @@ def scrape_all():
                 cars[car_id] = car
                 found += 1
         print(f"page {n}: +{found} (total {len(cars)})")
+        if n == 1 and found == 0:
+            debug_dump(html, soup)
         if "これ以上は車両がありません" in html and "Next Page" not in html and found == 0:
             break
         if not re.search(rf"/page/{n + 1}/", html):
