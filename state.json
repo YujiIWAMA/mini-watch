@@ -1,0 +1,77 @@
+{
+ "matches": {
+  "7646": {
+   "id": "7646",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2016,
+   "km": 54000,
+   "price": 1461000,
+   "url": "https://ir-japan.net/stocks/bmw/7646.html",
+   "first_seen": "2026-11-22"
+  },
+  "7619": {
+   "id": "7619",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2017,
+   "km": 41000,
+   "price": 1998000,
+   "url": "https://ir-japan.net/stocks/bmw/7619.html",
+   "first_seen": "2026-11-22"
+  },
+  "7630": {
+   "id": "7630",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2015,
+   "km": 36000,
+   "price": 1695000,
+   "url": "https://ir-japan.net/stocks/bmw/7630.html",
+   "first_seen": "2026-11-22"
+  },
+  "7553": {
+   "id": "7553",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2018,
+   "km": 33000,
+   "price": 1740000,
+   "url": "https://ir-japan.net/stocks/bmw/7553.html",
+   "first_seen": "2026-11-22"
+  },
+  "7413": {
+   "id": "7413",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2016,
+   "km": 54000,
+   "price": 1760000,
+   "url": "https://ir-japan.net/stocks/bmw/7413.html",
+   "first_seen": "2026-11-22"
+  },
+  "7193": {
+   "id": "7193",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2017,
+   "km": 65000,
+   "price": 1392000,
+   "url": "https://ir-japan.net/stocks/bmw/7193.html",
+   "first_seen": "2026-11-22"
+  },
+  "7070": {
+   "id": "7070",
+   "name": "ミニクラブマン クーパーS",
+   "code": "F54",
+   "year": 2016,
+   "km": 27000,
+   "price": 1784000,
+   "url": "https://ir-japan.net/stocks/bmw/7070.html",
+   "first_seen": "2026-11-22"
+  }
+ },
+ "sold": [],
+ "last_total": 298,
+ "checked_at": "2026-11-22T20:48+09:00"
+}
