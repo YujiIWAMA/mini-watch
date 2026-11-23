@@ -71,12 +71,14 @@ def parse_card(car_id, node):
     head = text.split("モデル")[0]            # 車名・装備部分
     m_name = re.search(r"(ミニ\S+)\s+((?:クーパー|ワン|ジョン|JCW)\s?\S*)((?:\s+(?:ALL4|\S+ED|\S*エディション|ワンオーナー))*)", head)
     name = " ".join(x.strip() for x in m_name.groups() if x and x.strip()) if m_name else head[:40]
+    m_color = re.search(r"ボディカラー\s*([^/／]+?)\s*(?:[/／]|ミッション|年式|$)", text)
     m_year = re.search(r"(\d{4})年式", text)
     m_km = re.search(r"([\d,]+)km", compact)
     return {
         "id": car_id,
         "name": name,
         "code": code,
+        "color": m_color.group(1).strip() if m_color else "",
         "year": int(m_year.group(1)) if m_year else None,
         "km": int(m_km.group(1).replace(",", "")) if m_km else None,
         "price": price,
@@ -146,6 +148,8 @@ def man(yen):
 
 def desc(c):
     parts = [c["name"]]
+    if c.get("color"):
+        parts.append(c["color"])
     if c.get("year"):
         parts.append(f"{c['year']}年")
     if c.get("km") is not None:
@@ -173,15 +177,15 @@ def write_status(matches, sold_log, total, now):
         "",
         f"## 現在 {len(matches)} 台（安い順）",
         "",
-        "| 支払総額 | 車名 | 年式 | 走行 | 掲載確認日 |",
-        "|---|---|---|---|---|",
+        "| 支払総額 | 車名 | 色 | 年式 | 走行 | 掲載確認日 |",
+        "|---|---|---|---|---|---|",
     ]
     for c in sorted(matches.values(), key=lambda c: c["price"]):
         km = f"{c['km'] / 10000:.1f}万km" if c.get("km") is not None else "-"
-        lines.append(f"| {man(c['price'])} | [{c['name']}]({c['url']}) | {c.get('year') or '-'} | {km} | {c['first_seen']} |")
+        lines.append(f"| {man(c['price'])} | [{c['name']}]({c['url']}) | {c.get('color') or '-'} | {c.get('year') or '-'} | {km} | {c['first_seen']} |")
     lines += ["", "## 最近掲載終了した車（売約など）", ""]
     for s in sold_log[:20]:
-        lines.append(f"- {s['gone']}：{desc(s)} {man(s['price'])}（{s['first_seen']}〜）")
+        lines.append(f"- {s['gone']}：[{desc(s)}]({s['url']}) {man(s['price'])}（{s['first_seen']}〜）")
     if not sold_log:
         lines.append("- まだありません")
     with open(STATUS_FILE, "w", encoding="utf-8") as f:
@@ -234,19 +238,19 @@ def main():
 
     if first_run:
         cheapest = sorted(new_matches.values(), key=lambda c: c["price"])
-        msg = "\n".join(f"・{man(c['price'])} {desc(c)}" for c in cheapest) or "該当なし"
+        msg = "\n".join(f"・{man(c['price'])} {desc(c)}\n  {c['url']}" for c in cheapest) or "該当なし"
         notify(f"🚗 監視を開始しました（現在 {len(new_matches)} 台）", msg, tags=["car"])
     else:
         for c in added:
-            notify(f"🆕 新着 {man(c['price'])}", desc(c), click=c["url"], tags=["new"])
+            notify(f"🆕 新着 {man(c['price'])}", f"{desc(c)}\n{c['url']}", click=c["url"], tags=["new"])
         for c in dropped:
             notify(f"💴 値下げ {man(old[c['id']]['price'])} → {man(c['price'])}",
-                   desc(c), click=c["url"], tags=["moneybag"])
+                   f"{desc(c)}\n{c['url']}", click=c["url"], tags=["moneybag"])
         for c in gone:
-            notify(f"✅ 掲載終了 {man(c['price'])}", f"{desc(c)}（{c['first_seen']}から掲載）",
+            notify(f"✅ 掲載終了 {man(c['price'])}", f"{desc(c)}（{c['first_seen']}から掲載）\n{c['url']}",
                    tags=["checkered_flag"])
         for c, now_c in out_of_range:
-            notify(f"↗️ 条件外に {man(c['price'])} → {man(now_c['price'])}", desc(c),
+            notify(f"↗️ 条件外に {man(c['price'])} → {man(now_c['price'])}", f"{desc(c)}\n{c['url']}",
                    click=c["url"])
 
     sold = [dict(c, gone=today) for c in gone] + state.get("sold", [])
