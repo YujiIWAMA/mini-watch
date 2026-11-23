@@ -253,6 +253,12 @@ def main():
             notify(f"↗️ 条件外に {man(c['price'])} → {man(now_c['price'])}", f"{desc(c)}\n{c['url']}",
                    click=c["url"])
 
+    # 手動実行（Run workflow）のときは変化がなくても現在の一覧を通知
+    if not first_run and os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        cheapest = sorted(new_matches.values(), key=lambda c: c["price"])
+        msg = "\n".join(f"・{man(c['price'])} {desc(c)}\n  {c['url']}" for c in cheapest) or "該当なし"
+        notify(f"📋 現在の該当車 {len(new_matches)} 台", msg, tags=["clipboard"])
+
     sold = [dict(c, gone=today) for c in gone] + state.get("sold", [])
     state = {"matches": new_matches, "sold": sold[:100], "last_total": total,
              "checked_at": now.isoformat(timespec="minutes")}
