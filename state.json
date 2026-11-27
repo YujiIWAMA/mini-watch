@@ -18,7 +18,7 @@
    "color": "ペッパーホワイト",
    "year": 2017,
    "km": 41000,
-   "price": 1998000,
+   "price": 1898000,
    "url": "https://ir-japan.net/stocks/bmw/7619.html",
    "first_seen": "2026-11-22"
   },
@@ -62,7 +62,7 @@
    "color": "ピュアバーガンディ",
    "year": 2017,
    "km": 65000,
-   "price": 1392000,
+   "price": 1246000,
    "url": "https://ir-japan.net/stocks/bmw/7193.html",
    "first_seen": "2026-11-22"
   },
@@ -80,5 +80,5 @@
  },
  "sold": [],
  "last_total": 287,
- "checked_at": "2026-11-27T13:56+09:00"
+ "checked_at": "2026-11-28T04:26+09:00"
 }
